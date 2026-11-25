@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}StudentHub Cloud{% endblock %}</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            appDark: '#070b14',
+            cardDark: '#0d1322',
+            borderDark: '#192237',
+            inputDark: '#0a0f1d'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #070b14;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(88, 28, 135, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(15, 23, 42, 0.4) 0px, transparent 50%);
+    }
+    /* Scrollbar personnalisée */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070b14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-200 antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-[#151d30] bg-[#070b14]/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Navigation Tabs -->
+      <div class="flex items-center gap-8">
+        <!-- Logo StudentHub -->
+        <a href="{{ url_for('dashboard') }}" class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <i class="fa-solid fa-graduation-cap text-white text-base"></i>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-base font-bold text-white tracking-tight leading-none">StudentHub</span>
+            <span class="text-[9px] font-semibold text-blue-400 tracking-wider uppercase mt-0.5">CLOUD PLATFORM</span>
+          </div>
+        </a>
+
+        <!-- Navigation Pills -->
+        <nav class="flex items-center gap-1.5">
+          <a href="{{ url_for('dashboard') }}" 
+             class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 {% if active_page == 'dashboard' %}bg-[#111c35] text-blue-400 border border-blue-500/40 shadow-sm shadow-blue-500/10{% else %}text-slate-400 hover:text-white hover:bg-slate-800/40{% endif %}">
+            <i class="fa-solid fa-table-cells-large text-xs"></i>
+            Dashboard
+          </a>
+          <a href="{{ url_for('students') }}" 
+             class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 {% if active_page == 'students' %}bg-[#111c35] text-blue-400 border border-blue-500/40 shadow-sm shadow-blue-500/10{% else %}text-slate-400 hover:text-white hover:bg-slate-800/40{% endif %}">
+            <i class="fa-solid fa-user-group text-xs"></i>
+            Étudiants
+          </a>
+        </nav>
+      </div>
+
+      <!-- Right Action: Admin Login / Logout -->
+      <div class="flex items-center gap-3">
+        {% if is_admin %}
+          <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            admin
+          </div>
+          <a href="{{ url_for('logout') }}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-slate-700/60 hover:border-red-500/30 text-xs font-semibold transition-all">
+            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+            Déconnexion
+          </a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#111c35] hover:bg-blue-600/30 text-blue-400 hover:text-blue-300 border border-blue-500/40 text-xs font-semibold transition-all shadow-sm shadow-blue-500/10">
+            <i class="fa-solid fa-right-to-bracket text-xs"></i>
+            Connexion Admin
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Page Main Content -->
+  <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

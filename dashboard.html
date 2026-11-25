@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - StudentHub Cloud{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header Section with Badge & Action Buttons -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <!-- Top Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111c35] border border-blue-500/30 text-blue-400 text-xs font-medium mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+        EPI - Session - IoT - Cloud Computing 2026-2027
+      </div>
+
+      <!-- Main Title & Subtitle -->
+      <h1 class="text-3xl font-extrabold text-white tracking-tight">
+        StudentHub Cloud
+      </h1>
+      <p class="text-sm text-slate-400 mt-1">
+        Plateforme de gestion des étudiants — hébergée sur <span class="text-blue-400 font-medium">Microsoft Azure</span>
+      </p>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="flex items-center gap-3">
+      <button onclick="location.reload()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0d1322] hover:bg-[#162038] text-slate-300 border border-[#192237] text-xs font-semibold transition-all">
+        <i class="fa-solid fa-arrows-rotate text-xs"></i>
+        Actualiser
+      </button>
+      <a href="{{ url_for('students') }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/25 transition-all">
+        Gérer les étudiants <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- 4 Stats Metric Cards (Matching Image 1) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    
+    <!-- Card 1: Total Étudiants -->
+    <div class="rounded-2xl border border-[#172238] bg-[#0c1220]/80 p-5 backdrop-blur-sm relative overflow-hidden group hover:border-blue-500/40 transition-all">
+      <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-4">
+        <i class="fa-solid fa-user-group text-sm"></i>
+      </div>
+      <div class="text-3xl font-extrabold text-white tracking-tight">{{ total_students }}</div>
+      <div class="text-xs font-bold text-slate-200 mt-0.5">Total Étudiants</div>
+      <div class="text-[11px] text-slate-400 mt-0.5">Inscrits dans le système</div>
+    </div>
+
+    <!-- Card 2: Filières actives -->
+    <div class="rounded-2xl border border-[#172238] bg-[#0c1220]/80 p-5 backdrop-blur-sm relative overflow-hidden group hover:border-purple-500/40 transition-all">
+      <div class="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4">
+        <i class="fa-solid fa-layer-group text-sm"></i>
+      </div>
+      <div class="text-3xl font-extrabold text-white tracking-tight">{{ total_filieres }}</div>
+      <div class="text-xs font-bold text-slate-200 mt-0.5">Filières actives</div>
+      <div class="text-[11px] text-slate-400 mt-0.5">Spécialités disponibles</div>
+    </div>
+
+    <!-- Card 3: Niveaux d'études -->
+    <div class="rounded-2xl border border-[#172238] bg-[#0c1220]/80 p-5 backdrop-blur-sm relative overflow-hidden group hover:border-cyan-500/40 transition-all">
+      <div class="w-10 h-10 rounded-xl bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4">
+        <i class="fa-solid fa-graduation-cap text-sm"></i>
+      </div>
+      <div class="text-3xl font-extrabold text-white tracking-tight">{{ total_niveaux }}</div>
+      <div class="text-xs font-bold text-slate-200 mt-0.5">Niveaux d'études</div>
+      <div class="text-[11px] text-slate-400 mt-0.5">De L1 à Ing3</div>
+    </div>
+
+    <!-- Card 4: Ajoutés récemment -->
+    <div class="rounded-2xl border border-[#172238] bg-[#0c1220]/80 p-5 backdrop-blur-sm relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+      <div class="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
+        <i class="fa-solid fa-sparkles text-sm"></i>
+      </div>
+      <div class="text-3xl font-extrabold text-white tracking-tight">{{ total_students }}</div>
+      <div class="text-xs font-bold text-slate-200 mt-0.5">Ajoutés récemment</div>
+      <div class="text-[11px] text-slate-400 mt-0.5">Ces 7 derniers jours</div>
+    </div>
+
+  </div>
+
+  <!-- Statistiques Section Header -->
+  <div class="pt-2">
+    <div class="flex items-center gap-2">
+      <span class="text-lg">📊</span>
+      <h2 class="text-base font-bold text-white tracking-tight">Statistiques</h2>
+    </div>
+    <p class="text-xs text-slate-400 mt-0.5">Vue d'ensemble des inscriptions par filière et niveau</p>
+  </div>
+
+  <!-- Charts Row: Répartition par filière & Par niveau d'études (Image 1) -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    
+    <!-- Left Box: Répartition par filière (Bar Chart) -->
+    <div class="rounded-2xl border border-[#172238] bg-[#0c1220]/80 p-6 backdrop-blur-sm flex flex-col justify-between">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-chart-column text-blue-400 text-xs"></i>
+          <h3 class="text-sm font-bold text-white">Répartition par filière</h3>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-6">Nombre d'étudiants par filière</p>
+      </div>
+
+      <!-- Bar Chart Component -->
+      <div class="h-56 flex flex-col justify-end pt-4 pb-2">
+        <div class="flex items-end justify-around h-44 border-b border-slate-800/80 px-4 gap-6">
+          
+          <!-- Bar 1: IoT -->
+          <div class="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+            <span class="text-xs font-bold text-white">{{ filiere_counts.get('IoT', 0) }}</span>
+            <div class="w-full bg-blue-500 rounded-t-lg transition-all duration-500 shadow-lg shadow-blue-500/20" 
+                 style="height: {% if total_students > 0 %}{{ (filiere_counts.get('IoT', 0) / 2) * 110 }}px{% else %}10px{% endif %}; min-height: 20px;"></div>
+            <span class="text-xs font-medium text-slate-300 mt-2">IoT</span>
+          </div>
+
+          <!-- Bar 2: Mobile -->
+          <div class="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+            <span class="text-xs font-bold text-white">{{ filiere_counts.get('Mobile', 0) }}</span>
+            <div class="w-full bg-[#ef4444] rounded-t-lg transition-all duration-500 shadow-lg shadow-red-500/20" 
+                 style="height: {% if total_students > 0 %}{{ (filiere_counts.get('Mobile', 0) / 2) * 110 }}px{% else %}10px{% endif %}; min-height: 20px;"></div>
+            <span class="text-xs font-medium text-slate-300 mt-2">Mobile</span>
+          </div>
+
+          <!-- Bar 3: Informatique -->
+          <div class="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+            <span class="text-xs font-bold text-white">{{ filiere_counts.get('Informatique', 0) }}</span>
+            <div class="w-full bg-[#a855f7] rounded-t-lg transition-all duration-500 shadow-lg shadow-purple-500/20" 
+                 style="height: {% if total_students > 0 %}{{ (filiere_counts.get('Informatique', 0) / 2) * 110 }}px{% else %}10px{% endif %}; min-height: 20px;"></div>
+            <span class="text-xs font-medium text-slate-300 mt-2">Informat...</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Box: Par niveau d'études (Donut Chart) -->
+    <div class="rounded-2xl border border-[#172238] bg-[#0c1220]/80 p-6 backdrop-blur-sm flex flex-col justify-between">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-chart-pie text-cyan-400 text-xs"></i>
+          <h3 class="text-sm font-bold text-white">Par niveau d'études</h3>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-6">Distribution des niveaux</p>
+      </div>
+
+      <!-- Donut Chart & Legend -->
+      <div class="h-56 flex items-center justify-around gap-6">
+        
+        <!-- Donut Visual (SVG) -->
+        <div class="relative w-36 h-36 flex items-center justify-center">
+          <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+            <!-- Background Ring -->
+            <path class="text-slate-800" stroke-width="4" stroke="currentColor" fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <!-- Ing2 Slice (Purple ~75%) -->
+            <path class="text-[#a855f7]" stroke-dasharray="75, 100" stroke-width="4.5" stroke-linecap="round" stroke="currentColor" fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            <!-- Ing1 Slice (Cyan/Blue ~25%) -->
+            <path class="text-[#3b82f6]" stroke-dasharray="25, 100" stroke-dashoffset="-75" stroke-width="4.5" stroke-linecap="round" stroke="currentColor" fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          </svg>
+          <div class="absolute flex flex-col items-center justify-center">
+            <span class="text-xl font-extrabold text-white leading-none">{{ total_students }}</span>
+            <span class="text-[9px] text-slate-400 mt-0.5">Étudiants</span>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 text-xs">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            <span class="text-slate-300 font-medium">Ing1</span>
+            <span class="text-slate-400 font-mono text-[11px]">{{ niveau_counts.get('Ing1', 1) }}</span>
+            <span class="text-slate-500 text-[11px]">25%</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+            <span class="text-slate-300 font-medium">Ing2</span>
+            <span class="text-slate-400 font-mono text-[11px]">{{ niveau_counts.get('Ing2', 3) }}</span>
+            <span class="text-slate-500 text-[11px]">75%</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Box: Détail des filières (Image 1) -->
+  <div class="max-w-md rounded-2xl border border-[#172238] bg-[#0c1220]/80 p-5 backdrop-blur-sm">
+    <div class="flex items-center gap-2 mb-1">
+      <i class="fa-solid fa-list-check text-slate-400 text-xs"></i>
+      <h3 class="text-xs font-bold text-white">Détail des filières</h3>
+    </div>
+    <p class="text-[10px] text-slate-400 mb-4">Pourcentage par filière</p>
+
+    <div class="space-y-3.5 text-xs">
+      <!-- IoT -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-slate-300 font-medium text-[11px]">IoT</span>
+          <span class="text-slate-400 text-[10px]">2 &nbsp; 50%</span>
+        </div>
+        <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+          <div class="h-full bg-blue-500 rounded-full" style="width: 50%"></div>
+        </div>
+      </div>
+
+      <!-- Mobile -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-slate-300 font-medium text-[11px]">Mobile</span>
+          <span class="text-slate-400 text-[10px]">1 &nbsp; 25%</span>
+        </div>
+        <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+          <div class="h-full bg-red-500 rounded-full" style="width: 25%"></div>
+        </div>
+      </div>
+
+      <!-- Informatique -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <span class="text-slate-300 font-medium text-[11px]">Informatique</span>
+          <span class="text-slate-400 text-[10px]">1 &nbsp; 25%</span>
+        </div>
+        <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+          <div class="h-full bg-purple-500 rounded-full" style="width: 25%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

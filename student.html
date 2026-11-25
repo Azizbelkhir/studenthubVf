@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}TP PaaS - Étudiants{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+  <!-- Header Section with TP Title -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 text-xs font-semibold uppercase tracking-wider mb-2">
+        <i class="fa-solid fa-graduation-cap"></i> Route : /student
+      </div>
+      <!-- Exact Title required by prompt -->
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        {{ tp_title }}
+      </h1>
+      <p class="text-slate-400 text-sm mt-1">
+        Espace de gestion des étudiants, des livrables et des architectures Cloud PaaS
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-3">
+      <button onclick="toggleModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs shadow-lg shadow-blue-600/30 transition-all">
+        <i class="fa-solid fa-user-plus"></i> Inscrire un Étudiant
+      </button>
+      <a href="{{ url_for('home') }}" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs border border-slate-700 transition">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Accueil
+      </a>
+    </div>
+  </div>
+
+  <!-- Student Cards Grid (StudentHub Style) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+    {% for s in students %}
+    <div class="group rounded-2xl border border-slate-800 bg-slate-900/60 hover:border-blue-500/40 p-6 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/5">
+      
+      <!-- Card Top: Avatar, Name, Badge -->
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <img src="{{ s.avatar }}" alt="{{ s.name }}" class="w-14 h-14 rounded-2xl object-cover ring-2 ring-blue-500/40 group-hover:ring-blue-400 transition">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-bold text-white group-hover:text-blue-300 transition">{{ s.name }}</h3>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-mono">{{ s.id }}</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">{{ s.email }}</p>
+            <span class="inline-block mt-1 text-xs font-medium text-cyan-400">{{ s.track }}</span>
+          </div>
+        </div>
+
+        <span class="px-3 py-1 rounded-full text-xs font-semibold {% if s.status == 'Actif' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% else %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% endif %}">
+          {{ s.status }}
+        </span>
+      </div>
+
+      <!-- Card Middle: Project details -->
+      <div class="mt-6 pt-4 border-t border-slate-800/80">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="text-slate-400 font-medium">Projet TP PaaS :</span>
+          <span class="text-slate-200 font-semibold">{{ s.project }}</span>
+        </div>
+        
+        <!-- Progress bar -->
+        <div class="mt-3">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+            <span>Progression du déploiement</span>
+            <span class="font-bold text-blue-400">{{ s.progress }}%</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" style="width: {{ s.progress }}%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Bottom: Cloud Badges -->
+      <div class="mt-5 flex items-center justify-between text-xs pt-3 border-t border-slate-800/60">
+        <div class="flex items-center gap-2 text-slate-400">
+          <span class="flex items-center gap-1"><i class="fa-brands fa-docker text-blue-400"></i> PaaS</span>
+          <span>•</span>
+          <span class="flex items-center gap-1"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Sécurisé</span>
+        </div>
+        <button class="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 text-xs">
+          Consulter livrable <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- PaaS Practical Work Guidelines Card -->
+  <div class="rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/30 via-slate-900/50 to-slate-900/50 p-6 sm:p-8 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">Objectifs du TP PaaS (Platform as a Service)</h2>
+          <p class="text-xs text-slate-400">Guide de validation des compétences en hébergement cloud</p>
+        </div>
+      </div>
+      <span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium border border-blue-500/20">
+        Semestre 1 - Cloud Computing
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-800">
+        <div class="font-bold text-white text-sm mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-code text-blue-400"></i> 1. Code & Dépendances
+        </div>
+        <p class="text-slate-400">
+          Structuration d'une application Flask prête pour la production avec un fichier <code>requirements.txt</code> contenant <code>Flask</code> et <code>gunicorn</code>.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-800">
+        <div class="font-bold text-white text-sm mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up text-cyan-400"></i> 2. Déploiement Azure
+        </div>
+        <p class="text-slate-400">
+          Hébergement automatique sur Azure App Service (Linux Web App) via Git ou Azure CLI, sans gestion de VM.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-800">
+        <div class="font-bold text-white text-sm mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-chart-line text-emerald-400"></i> 3. Monitoring & Scalabilité
+        </div>
+        <p class="text-slate-400">
+          Suivi des performances des routes <code>/</code> et <code>/student</code> avec diagnostic en temps réel.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal Inscription Étudiant (Simulation UI) -->
+<div id="studentModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+    <button onclick="toggleModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+    <h3 class="text-lg font-bold text-white mb-2">Ajouter un étudiant au TP PaaS</h3>
+    <p class="text-xs text-slate-400 mb-4">Formulaire d'enregistrement pour la promotion Cloud 2026.</p>
+    
+    <form onsubmit="event.preventDefault(); alert('Étudiant enregistré avec succès dans la session !'); toggleModal();" class="space-y-4 text-xs">
+      <div>
+        <label class="block text-slate-300 font-medium mb-1">Nom complet</label>
+        <input type="text" placeholder="Ex: Mohamed Trabelsi" required class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-blue-500">
+      </div>
+      <div>
+        <label class="block text-slate-300 font-medium mb-1">Email universitaire</label>
+        <input type="email" placeholder="m.trabelsi@etudiant-cloud.tn" required class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-blue-500">
+      </div>
+      <div>
+        <label class="block text-slate-300 font-medium mb-1">Filière / Spécialité</label>
+        <select class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-blue-500">
+          <option>Ingénierie Cloud & DevOps</option>
+          <option>Architecture Cloud Azure</option>
+          <option>Sécurité & Réseaux Cloud</option>
+        </select>
+      </div>
+      <div class="pt-2 flex justify-end gap-2">
+        <button type="button" onclick="toggleModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">Annuler</button>
+        <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-500 font-semibold">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleModal() {
+    const modal = document.getElementById('studentModal');
+    modal.classList.toggle('hidden');
+  }
+</script>
+{% endblock %}

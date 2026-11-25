@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Portal - StudentHub Cloud{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex flex-col items-center justify-center px-4">
+  
+  <div class="max-w-[420px] w-full mx-auto">
+    
+    <!-- Top Icon (Matching Image 3) -->
+    <div class="flex justify-center mb-4">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/25">
+        <i class="fa-solid fa-graduation-cap text-white text-2xl"></i>
+      </div>
+    </div>
+
+    <!-- Title & Subtitle -->
+    <div class="text-center mb-6">
+      <h2 class="text-2xl font-bold text-white tracking-tight">Admin Portal</h2>
+      <p class="text-xs text-slate-400 mt-1">Connectez-vous pour gérer StudentHub Cloud</p>
+    </div>
+
+    <!-- Admin Login Card (Image 3) -->
+    <div class="rounded-2xl border border-[#19243b] bg-[#0b111e]/90 p-6 shadow-2xl backdrop-blur-sm">
+      
+      <!-- Demo Callout Box (Image 3) -->
+      <div class="mb-5 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center text-xs font-semibold text-blue-400">
+        Demo : admin / admin123
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center font-medium">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Form -->
+      <form method="POST" action="{{ url_for('login') }}" class="space-y-4 text-xs">
+        
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">NOM D'UTILISATEUR</label>
+          <input type="text" name="username" value="admin" required
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-[#070b14] border border-[#19243b] text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">MOT DE PASSE</label>
+          <div class="relative">
+            <input type="password" name="password" id="passwordInput" value="admin123" required
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-[#070b14] border border-[#19243b] text-white focus:outline-none focus:border-blue-500 transition pr-10">
+            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300">
+              <i class="fa-regular fa-eye text-xs" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" 
+                class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 mt-2">
+          <i class="fa-solid fa-lock-open text-xs"></i>
+          Se connecter
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Return Link (Image 3) -->
+    <div class="text-center mt-5">
+      <a href="{{ url_for('dashboard') }}" class="text-xs text-slate-400 hover:text-white transition">
+        ← Retour au dashboard
+      </a>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function togglePassword() {
+    const input = document.getElementById('passwordInput');
+    const icon = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}Gestion des Étudiants - StudentHub Cloud{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header Section with Title & Actions -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-white tracking-tight">
+        Gestion des Étudiants
+      </h1>
+      <p class="text-xs text-slate-400 mt-1">
+        <span id="studentCount">{{ students|length }}</span> étudiants enregistrés
+      </p>
+    </div>
+
+    <!-- Actions (Export CSV & Ajouter) -->
+    <div class="flex items-center gap-3">
+      <a href="{{ url_for('export_csv') }}" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0d1322] hover:bg-[#162038] text-slate-300 border border-[#192237] text-xs font-semibold transition-all">
+        <i class="fa-solid fa-arrow-down-to-bracket text-xs"></i>
+        Export CSV
+      </a>
+
+      {% if is_admin %}
+      <button onclick="openAddModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all">
+        <i class="fa-solid fa-plus text-xs"></i>
+        Ajouter un étudiant
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls (Matching Image 2 & 4) -->
+  <div class="flex flex-col md:flex-row items-center gap-3">
+    <!-- Search Bar -->
+    <div class="relative flex-1 w-full">
+      <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+      </span>
+      <input type="text" id="searchInput" oninput="filterStudents()" 
+             placeholder="Rechercher par nom, prénom, email, numéro..."
+             class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0c1220]/90 border border-[#172238] text-slate-200 placeholder-slate-500 text-xs focus:outline-none focus:border-blue-500/80 transition-all">
+    </div>
+
+    <!-- Filter Filière -->
+    <div class="flex items-center gap-2 w-full md:w-auto">
+      <div class="relative w-full md:w-44">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 text-xs">
+          <i class="fa-solid fa-filter text-[11px]"></i>
+        </span>
+        <select id="filiereFilter" onchange="filterStudents()" 
+                class="w-full pl-8 pr-7 py-2.5 rounded-xl bg-[#0c1220]/90 border border-[#172238] text-slate-300 text-xs focus:outline-none focus:border-blue-500/80 appearance-none cursor-pointer">
+          <option value="">Toutes filières</option>
+          <option value="IoT">IoT</option>
+          <option value="Mobile">Mobile</option>
+          <option value="Informatique">Informatique</option>
+        </select>
+        <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500 text-[10px]">
+          <i class="fa-solid fa-chevron-down"></i>
+        </span>
+      </div>
+
+      <!-- Filter Niveau -->
+      <div class="relative w-full md:w-40">
+        <select id="niveauFilter" onchange="filterStudents()" 
+                class="w-full px-3.5 py-2.5 rounded-xl bg-[#0c1220]/90 border border-[#172238] text-slate-300 text-xs focus:outline-none focus:border-blue-500/80 appearance-none cursor-pointer">
+          <option value="">Tous niveaux</option>
+          <option value="Ing1">Ing1</option>
+          <option value="Ing2">Ing2</option>
+          <option value="Ing3">Ing3</option>
+        </select>
+        <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500 text-[10px]">
+          <i class="fa-solid fa-chevron-down"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Data Table (Matching Image 2 & 4) -->
+  <div class="rounded-2xl border border-[#172238] bg-[#0c1220]/90 overflow-hidden shadow-xl backdrop-blur-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-[#090e1a]/90 text-[10px] text-slate-400 font-bold uppercase tracking-wider border-b border-[#172238]">
+          <tr>
+            <th class="px-5 py-3.5">N°</th>
+            <th class="px-5 py-3.5">ÉTUDIANT</th>
+            <th class="px-5 py-3.5">EMAIL</th>
+            <th class="px-5 py-3.5">FILIÈRE</th>
+            <th class="px-5 py-3.5">NIVEAU</th>
+            <th class="px-5 py-3.5">INSCRIPTION</th>
+            {% if is_admin %}
+            <th class="px-5 py-3.5 text-right">ACTIONS</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody id="studentTableBody" class="divide-y divide-[#172238]/60 text-slate-300">
+          {% for s in students %}
+          <tr class="hover:bg-[#11192d]/50 transition-colors student-row" 
+              data-name="{{ s.first_name }} {{ s.last_name }}" 
+              data-email="{{ s.email }}" 
+              data-id="{{ s.id }}" 
+              data-filiere="{{ s.filiere }}" 
+              data-niveau="{{ s.niveau }}">
+            
+            <!-- N° ID -->
+            <td class="px-5 py-4 font-mono text-[11px] text-slate-400 whitespace-nowrap">
+              <span class="px-2 py-1 rounded-md bg-[#131b2e] border border-slate-800 text-slate-400">
+                {{ s.id }}
+              </span>
+            </td>
+
+            <!-- ÉTUDIANT (Avatar Circle + Name) -->
+            <td class="px-5 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <!-- Initials Avatar matching screenshot colors -->
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
+                  {% if s.color == 'emerald' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
+                  {% elif s.color == 'pink' %}bg-pink-500/20 text-pink-400 border border-pink-500/30
+                  {% elif s.color == 'rose' %}bg-rose-500/20 text-rose-400 border border-rose-500/30
+                  {% elif s.color == 'purple' %}bg-purple-500/20 text-purple-400 border border-purple-500/30
+                  {% else %}bg-blue-500/20 text-blue-400 border border-blue-500/30{% endif %}">
+                  {{ s.first_name[0]|upper }}{{ s.last_name[0]|upper }}
+                </div>
+                <div class="font-bold text-white text-xs">
+                  {{ s.first_name }} {{ s.last_name }}
+                </div>
+              </div>
+            </td>
+
+            <!-- EMAIL -->
+            <td class="px-5 py-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">
+              {{ s.email }}
+            </td>
+
+            <!-- FILIÈRE BADGE -->
+            <td class="px-5 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium
+                {% if s.filiere == 'Mobile' %}bg-red-500/10 text-red-400 border border-red-500/25
+                {% elif s.filiere == 'IoT' %}bg-blue-500/10 text-blue-400 border border-blue-500/25
+                {% elif s.filiere == 'Informatique' %}bg-purple-500/10 text-purple-400 border border-purple-500/25
+                {% else %}bg-slate-700/40 text-slate-300 border border-slate-600{% endif %}">
+                <span class="w-1.5 h-1.5 rounded-full 
+                  {% if s.filiere == 'Mobile' %}bg-red-400
+                  {% elif s.filiere == 'IoT' %}bg-blue-400
+                  {% elif s.filiere == 'Informatique' %}bg-purple-400
+                  {% else %}bg-slate-400{% endif %}"></span>
+                {{ s.filiere }}
+              </span>
+            </td>
+
+            <!-- NIVEAU BADGE -->
+            <td class="px-5 py-4 whitespace-nowrap">
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/25">
+                {{ s.niveau }}
+              </span>
+            </td>
+
+            <!-- INSCRIPTION -->
+            <td class="px-5 py-4 text-slate-400 text-[11px] whitespace-nowrap">
+              {{ s.inscription_date }}
+            </td>
+
+            <!-- ACTIONS (Admin only, Image 4) -->
+            {% if is_admin %}
+            <td class="px-5 py-4 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-2">
+                <!-- Edit button -->
+                <button onclick="openEditModal('{{ s.id }}', '{{ s.last_name }}', '{{ s.first_name }}', '{{ s.email }}', '{{ s.filiere }}', '{{ s.niveau }}')" 
+                        class="w-7 h-7 rounded-lg bg-blue-600/10 hover:bg-blue-600/25 text-blue-400 border border-blue-500/20 flex items-center justify-center transition-all" title="Modifier">
+                  <i class="fa-regular fa-pen-to-square text-xs"></i>
+                </button>
+                <!-- Delete button -->
+                <button onclick="deleteStudent('{{ s.id }}', '{{ s.first_name }} {{ s.last_name }}')" 
+                        class="w-7 h-7 rounded-lg bg-red-600/10 hover:bg-red-600/25 text-red-400 border border-red-500/20 flex items-center justify-center transition-all" title="Supprimer">
+                  <i class="fa-regular fa-trash-can text-xs"></i>
+                </button>
+              </div>
+            </td>
+            {% endif %}
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer with Count & Pagination -->
+    <div class="px-5 py-3.5 bg-[#090e1a]/60 border-t border-[#172238] flex items-center justify-between text-xs text-slate-400">
+      <div>
+        Affichage de 1-{{ students|length }} sur <span id="totalVisible">{{ students|length }}</span> étudiants
+      </div>
+      <div class="flex items-center gap-1">
+        <button class="w-6 h-6 rounded-md bg-[#11192c] border border-slate-800 text-slate-500 flex items-center justify-center text-[10px] cursor-not-allowed">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <span class="w-6 h-6 rounded-md bg-blue-600 text-white font-bold flex items-center justify-center text-[11px]">
+          1
+        </span>
+        <button class="w-6 h-6 rounded-md bg-[#11192c] border border-slate-800 text-slate-500 flex items-center justify-center text-[10px] cursor-not-allowed">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning Banner when NOT Admin (Image 2) -->
+  {% if not is_admin %}
+  <div class="p-3.5 rounded-xl border border-blue-500/20 bg-[#0d1527]/70 text-xs text-blue-300 flex items-center gap-2.5">
+    <i class="fa-solid fa-lock text-amber-400 text-sm"></i>
+    <span>Connectez-vous en tant qu'administrateur pour ajouter, modifier ou supprimer des étudiants.</span>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Modal: Nouvel Étudiant / Modifier (Image 5) -->
+<div id="studentModal" class="fixed inset-0 z-50 hidden bg-[#03060d]/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-[#0b111e] border border-[#19243b] rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+    
+    <!-- Modal Close Button -->
+    <button onclick="closeModal()" class="w-7 h-7 rounded-lg bg-[#141d33] hover:bg-[#1c2947] text-slate-400 hover:text-white flex items-center justify-center absolute top-5 right-5 transition">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
+
+    <!-- Modal Header -->
+    <div class="flex items-center gap-2.5 mb-1">
+      <span class="text-purple-400 text-base font-bold" id="modalIcon">＋</span>
+      <h3 class="text-base font-bold text-white tracking-tight" id="modalTitle">Nouvel étudiant</h3>
+    </div>
+    <p class="text-[11px] text-slate-400 mb-5">Remplissez les informations de l'étudiant</p>
+
+    <!-- Form -->
+    <form id="studentForm" method="POST" action="{{ url_for('add_student') }}" class="space-y-4 text-xs">
+      
+      <!-- Nom & Prénom (2 Columns) -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">NOM *</label>
+          <input type="text" name="last_name" id="modalLastName" required placeholder="ex: Ben Ali"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-[#070b14] border border-[#19243b] text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">PRÉNOM *</label>
+          <input type="text" name="first_name" id="modalFirstName" required placeholder="ex: Ahmed"
+                 class="w-full px-3.5 py-2.5 rounded-xl bg-[#070b14] border border-[#19243b] text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition">
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">EMAIL *</label>
+        <input type="email" name="email" id="modalEmail" required placeholder="ex: ahmed.benali@epi.tn"
+               class="w-full px-3.5 py-2.5 rounded-xl bg-[#070b14] border border-[#19243b] text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition">
+      </div>
+
+      <!-- Filière & Niveau (2 Columns) -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">FILIÈRE *</label>
+          <select name="filiere" id="modalFiliere" required
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-[#070b14] border border-[#19243b] text-slate-200 focus:outline-none focus:border-blue-500 transition cursor-pointer">
+            <option value="IoT">IoT</option>
+            <option value="Mobile">Mobile</option>
+            <option value="Informatique">Informatique</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">NIVEAU D'ÉTUDES *</label>
+          <select name="niveau" id="modalNiveau" required
+                  class="w-full px-3.5 py-2.5 rounded-xl bg-[#070b14] border border-[#19243b] text-slate-200 focus:outline-none focus:border-blue-500 transition cursor-pointer">
+            <option value="Ing1">Ing1</option>
+            <option value="Ing2">Ing2</option>
+            <option value="Ing3">Ing3</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Buttons: Annuler & Ajouter -->
+      <div class="pt-4 flex items-center justify-end gap-2.5">
+        <button type="button" onclick="closeModal()" 
+                class="px-4 py-2.5 rounded-xl bg-[#141d33] hover:bg-[#1a2642] text-slate-300 text-xs font-semibold transition">
+          Annuler
+        </button>
+        <button type="submit" id="modalSubmitBtn"
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition">
+          <i class="fa-solid fa-floppy-disk text-xs"></i>
+          <span id="modalSubmitText">Ajouter l'étudiant</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Modal Confirmation Suppression -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden bg-[#03060d]/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-[#0b111e] border border-red-500/30 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative text-center">
+    <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-400 mx-auto flex items-center justify-center text-xl mb-3">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h3 class="text-base font-bold text-white mb-1">Confirmer la suppression</h3>
+    <p class="text-xs text-slate-400 mb-5" id="deleteTargetText">Êtes-vous sûr de vouloir supprimer cet étudiant ?</p>
+    
+    <div class="flex items-center justify-center gap-3">
+      <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl bg-[#141d33] text-slate-300 text-xs font-semibold hover:bg-[#1a2642] transition">
+        Annuler
+      </button>
+      <button id="confirmDeleteBtn" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition">
+        Supprimer
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Fonctions de Recherche et Filtres Dynamiques
+  function filterStudents() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const filiere = document.getElementById('filiereFilter').value;
+    const niveau = document.getElementById('niveauFilter').value;
+
+    const rows = document.querySelectorAll('.student-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const name = (row.dataset.name || '').toLowerCase();
+      const email = (row.dataset.email || '').toLowerCase();
+      const id = (row.dataset.id || '').toLowerCase();
+      const rowFiliere = row.dataset.filiere || '';
+      const rowNiveau = row.dataset.niveau || '';
+
+      const matchesSearch = !q || name.includes(q) || email.includes(q) || id.includes(q);
+      const matchesFiliere = !filiere || rowFiliere === filiere;
+      const matchesNiveau = !niveau || rowNiveau === niveau;
+
+      if (matchesSearch && matchesFiliere && matchesNiveau) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const totalVisible = document.getElementById('totalVisible');
+    if (totalVisible) totalVisible.textContent = visibleCount;
+  }
+
+  // Modals Management
+  function openAddModal() {
+    const form = document.getElementById('studentForm');
+    form.action = "{{ url_for('add_student') }}";
+    document.getElementById('modalTitle').textContent = "Nouvel étudiant";
+    document.getElementById('modalIcon').textContent = "＋";
+    document.getElementById('modalSubmitText').textContent = "Ajouter l'étudiant";
+
+    document.getElementById('modalLastName').value = "";
+    document.getElementById('modalFirstName').value = "";
+    document.getElementById('modalEmail').value = "";
+    document.getElementById('modalFiliere').value = "IoT";
+    document.getElementById('modalNiveau').value = "Ing2";
+
+    document.getElementById('studentModal').classList.remove('hidden');
+  }
+
+  function openEditModal(id, lastName, firstName, email, filiere, niveau) {
+    const form = document.getElementById('studentForm');
+    form.action = `/students/edit/${id}`;
+    document.getElementById('modalTitle').textContent = "Modifier l'étudiant";
+    document.getElementById('modalIcon').textContent = "✎";
+    document.getElementById('modalSubmitText').textContent = "Enregistrer";
+
+    document.getElementById('modalLastName').value = lastName;
+    document.getElementById('modalFirstName').value = firstName;
+    document.getElementById('modalEmail').value = email;
+    document.getElementById('modalFiliere').value = filiere;
+    document.getElementById('modalNiveau').value = niveau;
+
+    document.getElementById('studentModal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('studentModal').classList.add('hidden');
+  }
+
+  // Suppression
+  let studentToDelete = null;
+  function deleteStudent(id, name) {
+    studentToDelete = id;
+    document.getElementById('deleteTargetText').textContent = `Êtes-vous sûr de vouloir supprimer l'étudiant ${name} (${id}) ?`;
+    document.getElementById('deleteModal').classList.remove('hidden');
+  }
+
+  function closeDeleteModal() {
+    studentToDelete = null;
+    document.getElementById('deleteModal').classList.add('hidden');
+  }
+
+  document.getElementById('confirmDeleteBtn')?.addEventListener('click', async () => {
+    if (!studentToDelete) return;
+    try {
+      const res = await fetch(`/students/delete/${studentToDelete}`, { method: 'POST' });
+      if (res.ok) {
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+</script>
+{% endblock %}
